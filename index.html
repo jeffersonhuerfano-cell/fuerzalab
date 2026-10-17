@@ -269,9 +269,23 @@ if (chartCanvas) {
 
       state.x += state.v * dt * 20; // Escalado visual px/m
 
-      // Límites de pantalla (rebote/reinicio)
-      if (state.x < 40) { state.x = 40; state.v = 0; }
-      if (state.x > canvas.width - 90) { state.x = canvas.width - 90; state.v = 0; }
+      // Límites de pantalla (detener al tocar los bordes)
+    if (state.x < 40) { 
+        state.x = 40; 
+        state.v = 0; 
+        state.isRunning = false; 
+    }
+    if (state.x > canvas.width - 90) { 
+        state.x = canvas.width - 90; 
+        state.v = 0; 
+        state.isRunning = false; // <-- Apaga el bucle para detener la gráfica
+
+        // Cambiar el botón visualmente a "Iniciar"
+        const btn = document.getElementById('btnPlay');
+        if (btn) {
+            btn.innerText = "Iniciar";
+            btn.style.backgroundColor = "#10b981";
+        }
     }
 
     function drawArrow(fromX, fromY, toX, toY, color, label) {
