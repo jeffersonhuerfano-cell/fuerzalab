@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FuerzaLab - Simulador de Fuerzas y Movimiento</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #f4f7f6; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; }
     h1 { color: #1e3a8a; margin-bottom: 5px; }
     p.subtitle { color: #4b5563; font-size: 0.95rem; margin-bottom: 20px; }
@@ -60,22 +61,25 @@
       </div>
 
       <div class="control-group">
-        <label>Fuerza Aplicada Izquierda ($F_1$): <span id="valF1" class="val-display">0 N</span></label>
+        <label>Fuerza Aplicada Izquierda (F₁): <span id="valF1" class="val-display">0 N</span></label>
         <input type="range" id="inputF1" min="0" max="500" value="0" oninput="updateValues()">
       </div>
 
       <div class="control-group">
-        <label>Fuerza Aplicada Derecha ($F_2$): <span id="valF2" class="val-display">100 N</span></label>
+       <label>Fuerza Aplicada Derecha (F₂): <span id="valF2" class="val-display">100 N</span></label>
         <input type="range" id="inputF2" min="0" max="500" value="100" oninput="updateValues()">
       </div>
-
+<div class="control-group">
+  <label for="inputAngle">Ángulo de Aplicación (θ): <span id="valAngle" class="val-display">0°</span></label>
+  <input type="range" id="inputAngle" min="0" max="90" value="0" oninput="updateValues()">
+</div>
       <div class="control-group">
-        <label>Masa del Objeto ($m$): <span id="valMass" class="val-display">10 kg</span></label>
+        <label>Masa del Objeto (m): <span id="valMass" class="val-display">10 kg</span></label>
         <input type="range" id="inputMass" min="1" max="100" value="10" oninput="updateValues()">
       </div>
 
       <div class="control-group">
-        <label>Coeficiente de Fricción ($\mu$): <span id="valFriction" class="val-display">0.20</span></label>
+        <label>Coeficiente de Fricción (μ): <span id="valFriction" class="val-display">0.20</span></label>
         <input type="range" id="inputFriction" min="0" max="1" step="0.05" value="0.20" oninput="updateValues()">
       </div>
 
@@ -85,10 +89,13 @@
       </div>
 
       <div style="margin-top: 15px; text-align: center;">
-        <span id="statusBadge" class="status-badge status-eq">Fuerzas Equilibradas ($F_{\text{net}} = 0$)</span>
+        <span id="statusBadge" class="status-badge status-eq">Fuerzas Equilibradas (F_net = 0 N)</span>
       </div>
     </div>
-
+<div style="width: 100%; margin-top: 20px; background: #ffffff; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+  <h3 style="font-size: 1rem; color: #1e3a8a; margin-bottom: 10px;">Gráfica de Movimiento (Velocidad vs. Tiempo)</h3>
+  <canvas id="motionChart" style="max-height: 220px;"></canvas>
+</div>
     <!-- Panel de Simulación Visual -->
     <div class="panel-simulation">
       <canvas id="simCanvas" width="600" height="320"></canvas>
