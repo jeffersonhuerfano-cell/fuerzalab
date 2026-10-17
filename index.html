@@ -53,11 +53,12 @@
       <div class="control-group">
         <label for="scenarioSelect">Escenario Cotidiano:</label>
         <select id="scenarioSelect" onchange="loadScenario()">
-          <option value="custom">Personalizado</option>
-          <option value="box">Empujar una caja pesada en el suelo</option>
-          <option value="tugofwar">Juego de tirar la cuerda (Fuerzas Opuestas)</option>
-          <option value="ice">Desplazamiento sobre hielo (Sin Fricción)</option>
-        </select>
+        <option value="custom">Personalizado</option>
+        <option value="box">Empujar una caja pesada en el suelo</option>
+        <option value="tugofwar">Juego de tirar la cuerda (Fuerzas Opuestas)</option>
+        <option value="ice">Desplazamiento sobre hielo (Sin Fricción)</option>
+        <option value="vectorial">Movimiento Vectorial 2D (Fuerza en Ángulo)</option>
+      </select>
       </div>
 
       <div class="control-group">
@@ -189,26 +190,50 @@ if (chartCanvas) {
     }
 
     function loadScenario() {
-      const scenario = document.getElementById('scenarioSelect').value;
-      if (scenario === 'box') {
-        document.getElementById('inputF1').value = 0;
-        document.getElementById('inputF2').value = 150;
-        document.getElementById('inputMass').value = 25;
-        document.getElementById('inputFriction').value = 0.40;
-      } else if (scenario === 'tugofwar') {
-        document.getElementById('inputF1').value = 200;
-        document.getElementById('inputF2').value = 200;
-        document.getElementById('inputMass').value = 15;
-        document.getElementById('inputFriction').value = 0.10;
-      } else if (scenario === 'ice') {
-        document.getElementById('inputF1').value = 0;
+    const scenario = document.getElementById('scenarioSelect').value;
+
+    if (scenario === 'tugofwar') {
+        // CASO 1: Reposo (Fuerzas Equilibradas)
+        document.getElementById('inputF1').value = 50;
         document.getElementById('inputF2').value = 50;
+        document.getElementById('inputAngle').value = 0;
         document.getElementById('inputMass').value = 10;
         document.getElementById('inputFriction').value = 0.00;
-      }
-      updateValues();
-      resetSimulation();
+
+    } else if (scenario === 'box') {
+        // CASO 2: MRU (Primera Ley de Newton - Velocidad Constante)
+        document.getElementById('inputF1').value = 0;
+        document.getElementById('inputF2').value = 20;
+        document.getElementById('inputAngle').value = 0;
+        document.getElementById('inputMass').value = 10;
+        document.getElementById('inputFriction').value = 0.20;
+
+    } else if (scenario === 'ice') {
+        // CASO 3: MRUA (Segunda Ley de Newton - Acelerado)
+        document.getElementById('inputF1').value = 30;
+        document.getElementById('inputF2').value = 80;
+        document.getElementById('inputAngle').value = 0;
+        document.getElementById('inputMass').value = 10;
+        document.getElementById('inputFriction').value = 0.00;
+
+    } else if (scenario === 'vectorial') {
+        // CASO 4: Vectorial 2D (Fuerza en Ángulo de 90°)
+        document.getElementById('inputF1').value = 60;
+        document.getElementById('inputF2').value = 80;
+        document.getElementById('inputAngle').value = 90;
+        document.getElementById('inputMass').value = 10;
+        document.getElementById('inputFriction').value = 0.00;
     }
+
+    // Actualizar variables físicas y reiniciar el lienzo
+    updateValues();
+    resetSimulation();
+
+    // Asignar velocidad inicial (v0 = 2 m/s) exclusivamente para MRU
+    if (scenario === 'box') {
+        state.v = 2.0;
+    }
+}
 
     function calculatePhysics() {
       const fAppliedNet = state.f2 - state.f1; // Derecha positiva, Izquierda negativa
