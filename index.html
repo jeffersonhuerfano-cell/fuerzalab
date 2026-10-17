@@ -285,10 +285,11 @@ if (chartCanvas) {
         if (btn) {
             btn.innerText = "Iniciar";
             btn.style.backgroundColor = "#10b981";
-        }
+                }
     }
+ }  // <-- Escribe la llave } en esta línea
 
-    function drawArrow(fromX, fromY, toX, toY, color, label) {
+ function drawArrow(fromX, fromY, toX, toY, color, label) {
       const headLength = 10;
       const dx = toX - fromX;
       const dy = toY - fromY;
