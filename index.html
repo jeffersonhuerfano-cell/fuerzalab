@@ -124,7 +124,38 @@
   <script>
     const canvas = document.getElementById('simCanvas');
     const ctx = canvas.getContext('2d');
+// --- Configuración e Inicialización de Chart.js ---
+const chartCanvas = document.getElementById('motionChart');
+let motionChart = null;
+let timeData = [0];
+let velocityData = [0];
 
+if (chartCanvas) {
+    const chartCtx = chartCanvas.getContext('2d');
+    motionChart = new Chart(chartCtx, {
+        type: 'line',
+        data: {
+            labels: timeData,
+            datasets: [{
+                label: 'Velocidad (m/s)',
+                data: velocityData,
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, text: 'Tiempo (s)' } },
+                y: { title: { display: true, text: 'Velocidad (m/s)' } }
+            }
+        }
+    });
+}
     // Estado físico del sistema
     let state = {
       f1: 0,           // N (hacia la izquierda)
