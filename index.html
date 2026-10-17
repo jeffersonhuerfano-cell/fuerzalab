@@ -377,14 +377,24 @@ if (chartCanvas) {
     }
 
     function resetSimulation() {
-      state.isRunning = false;
-      state.x = 50;
-      state.v = 0;
-      state.a = 0;
-      document.getElementById('btnPlay').innerText = "Iniciar";
-      document.getElementById('btnPlay').style.backgroundColor = "#10b981";
-      updateValues();
+    state.isRunning = false;
+    state.x = 50;
+    state.v = 0;
+    state.a = 0;
+    state.t = 0; // <-- Esta es la nueva línea que debes agregar
+    document.getElementById('btnPlay').innerText = "Iniciar";
+    document.getElementById('btnPlay').style.backgroundColor = "#10b981";
+    // --- REINICIAR Y LIMPIAR LA GRÁFICA ---
+    timeData = [0];
+    velocityData = [0];
+    if (motionChart) {
+        motionChart.data.labels = timeData;
+        motionChart.data.datasets[0].data = velocityData;
+        motionChart.update();
     }
+
+    updateValues();
+}
 
     function gameLoop(time) {
       if (!state.isRunning) return;
@@ -393,7 +403,13 @@ if (chartCanvas) {
 
       updatePhysics(dt);
       draw();
-
+// Actualizar la gráfica en tiempo real
+    state.t = (state.t || 0) + dt;
+    if (motionChart) {
+        motionChart.data.labels.push(state.t.toFixed(1));
+        motionChart.data.datasets[0].data.push(state.v.toFixed(2));
+        motionChart.update('none');
+    }
       requestAnimationFrame(gameLoop);
     }
 
