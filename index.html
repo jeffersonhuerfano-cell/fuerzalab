@@ -175,19 +175,21 @@ if (chartCanvas) {
     let lastTime = null;
 
     function updateValues() {
-      state.f1 = parseFloat(document.getElementById('inputF1').value);
-      state.f2 = parseFloat(document.getElementById('inputF2').value);
-      state.mass = parseFloat(document.getElementById('inputMass').value);
-      state.mu = parseFloat(document.getElementById('inputFriction').value);
+    state.f1 = parseFloat(document.getElementById('inputF1').value);
+    state.f2 = parseFloat(document.getElementById('inputF2').value);
+    state.angle = parseFloat(document.getElementById('inputAngle').value); // <-- Lee el ángulo
+    state.mass = parseFloat(document.getElementById('inputMass').value);
+    state.mu = parseFloat(document.getElementById('inputFriction').value);
 
-      document.getElementById('valF1').innerText = state.f1 + ' N';
-      document.getElementById('valF2').innerText = state.f2 + ' N';
-      document.getElementById('valMass').innerText = state.mass + ' kg';
-      document.getElementById('valFriction').innerText = state.mu.toFixed(2);
+    document.getElementById('valF1').innerText = state.f1 + ' N';
+    document.getElementById('valF2').innerText = state.f2 + ' N';
+    document.getElementById('valAngle').innerText = state.angle + '°';     // <-- Actualiza el texto del ángulo
+    document.getElementById('valMass').innerText = state.mass + ' kg';
+    document.getElementById('valFriction').innerText = state.mu.toFixed(2);
 
-      calculatePhysics();
-      draw();
-    }
+    calculatePhysics();
+    draw();
+}D
 
     function loadScenario() {
     const scenario = document.getElementById('scenarioSelect').value;
@@ -235,49 +237,62 @@ if (chartCanvas) {
     }
 }
 
-    function calculatePhysics() {
-      const fAppliedNet = state.f2 - state.f1; // Derecha positiva, Izquierda negativa
-      const normalForce = state.mass * state.g;
-      const maxStaticFriction = state.mu * normalForce;
+    
+function calculatePhysics() {
+    // 1. Caso 4: Vectorial 2D (Fuerzas en ángulo > 0°)
+    if (state.angle > 0) {
+        const rad = state.angle * Math.PI / 180;
+        const fx = state.f1;                         // Fuerza horizontal (60 N)
+        const fy = state.f2 * Math.sin(rad);          // Fuerza vertical (80 N a 90°)
 
-      if (Math.abs(state.v) < 0.001) {
-        // Objeto en reposo
-        if (Math.abs(fAppliedNet) <= maxStaticFriction) {
-          state.fFriction = -fAppliedNet;
-          state.fNet = 0;
-          state.a = 0;
-          state.v = 0;
+        // Magnitud del vector resultante por Pitágoras: FR = sqrt(60² + 80²) = 100 N
+        state.fFriction = 0;
+        state.fNet = Math.sqrt(fx * fx + fy * fy);
+        state.a = state.fNet / state.mass;            // Aceleración = 100 N / 10 kg = 10.0 m/s²
+    } else {
+        // 2. Movimiento 1D rectilíneo habitual (Casos 1, 2 y 3)
+        const fAppliedNet = state.f2 - state.f1; // Derecha positiva, Izquierda negativa
+        const normalForce = state.mass * (state.g || 9.81);
+        const maxStaticFriction = state.mu * normalForce;
+
+        if (Math.abs(state.v) < 0.001) {
+            // Objeto en reposo
+            if (Math.abs(fAppliedNet) <= maxStaticFriction) {
+                state.fFriction = -fAppliedNet;
+                state.fNet = 0;
+                state.a = 0;
+                state.v = 0;
+            } else {
+                state.fFriction = -Math.sign(fAppliedNet) * maxStaticFriction;
+                state.fNet = fAppliedNet + state.fFriction;
+                state.a = state.fNet / state.mass;
+            }
         } else {
-          state.fFriction = -Math.sign(fAppliedNet) * maxStaticFriction;
-          state.fNet = fAppliedNet + state.fFriction;
-          state.a = state.fNet / state.mass;
+            // Objeto en movimiento (fricción cinética)
+            state.fFriction = -Math.sign(state.v) * maxStaticFriction;
+            state.fNet = fAppliedNet + state.fFriction;
+            state.a = state.fNet / state.mass;
         }
-      } else {
-        // Objeto en movimiento (fricción cinética)
-        state.fFriction = -Math.sign(state.v) * maxStaticFriction;
-        state.fNet = fAppliedNet + state.fFriction;
-
-        // Si la fuerza neta opone el movimiento y detiene al objeto
-        state.a = state.fNet / state.mass;
-      }
-
-      // Actualización de badge de estado
-      const badge = document.getElementById('statusBadge');
-      if (Math.abs(state.fNet) < 0.01) {
-        badge.className = "status-badge status-eq";
-        badge.innerText = "Fuerzas Equilibradas (F_net = 0 N)";
-      } else {
-        badge.className = "status-badge status-uneq";
-        badge.innerText = "Fuerzas Desequilibradas (F_net = " + state.fNet.toFixed(1) + " N)";
-      }
-
-      // Actualizar UI
-      document.getElementById('metricFnet').innerText = state.fNet.toFixed(1) + ' N';
-      document.getElementById('metricAcc').innerText = state.a.toFixed(2) + ' m/s²';
-      document.getElementById('metricVel').innerText = state.v.toFixed(2) + ' m/s';
-      document.getElementById('metricPos').innerText = (state.x / 10).toFixed(1) + ' m';
     }
 
+    // Actualización de badge de estado (fuerzas equilibradas/desequilibradas)
+    const badge = document.getElementById('statusBadge');
+    if (badge) {
+        if (Math.abs(state.fNet) < 0.01) {
+            badge.className = "status-badge status-eq";
+            badge.innerText = "Fuerzas Equilibradas (F_net = 0 N)";
+        } else {
+            badge.className = "status-badge status-uneq";
+            badge.innerText = "Fuerzas Desequilibradas (F_net = " + state.fNet.toFixed(1) + " N)";
+        }
+    }
+
+    // Actualizar lecturas en las tarjetas inferiores de la pantalla
+    if (document.getElementById('metricFnet')) document.getElementById('metricFnet').innerText = state.fNet.toFixed(1) + ' N';
+    if (document.getElementById('metricAcc')) document.getElementById('metricAcc').innerText = state.a.toFixed(2) + ' m/s²';
+    if (document.getElementById('metricVel')) document.getElementById('metricVel').innerText = state.v.toFixed(2) + ' m/s';
+    if (document.getElementById('metricPos')) document.getElementById('metricPos').innerText = (state.x / 10).toFixed(1) + ' m';
+}
     function updatePhysics(dt) {
       if (!state.isRunning) return;
 
